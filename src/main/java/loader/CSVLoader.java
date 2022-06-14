@@ -66,30 +66,42 @@ public class CSVLoader {
         if (fileLoaded) {
             if (file.length() == 0) {
                 System.out.println("Файл пуст.");
+                printLine(1);
             } else {
+                int currentColumn = 0;
                 System.out.println(fileName + ":");
-                printLine(maxColumns);
                 Formatter fmt;
-                for (var row : fileContent) {
+                while (currentColumn < maxColumns) {
                     fmt = new Formatter();
-                    fmt.format("%1s", "|");
-                    int counter = 0;
-                    for (String cell : row) {
-                        counter++;
-                        if (cell.length() > maxCellLen - 1) {
-                            fmt.format("%" + maxCellLen + "s", cell.substring(0, maxCellLen - 4) + "...|");
-                        } else {
-                            fmt.format("%" + maxCellLen + "s", cell + "|");
-                        }
-                    }
-                    while (counter < maxColumns) {
-                        fmt.format("%" + maxCellLen + "s", "|");
-                        counter++;
+                    for (int i = currentColumn + 1; i < Math.min(currentColumn + 5, maxColumns) + 1; ++i) {
+                        fmt.format("%" + maxCellLen + "s", "Столбец " + i + ":");
                     }
                     System.out.println(fmt);
+                    printLine(Math.min(maxColumns - currentColumn, 5));
+                    for (var row : fileContent) {
+                        fmt = new Formatter();
+                        fmt.format("%1s", "|");
+                        int counter = 0;
+                        for (int i = currentColumn; i < Math.min(currentColumn + 5, maxColumns); ++i) {
+                            counter++;
+                            if (row.size() > i && row.get(i).length() > maxCellLen - 1) {
+                                fmt.format("%" + maxCellLen + "s", row.get(i).substring(0, maxCellLen - 4) + "...|");
+                            } else if (row.size() > i) {
+                                fmt.format("%" + maxCellLen + "s", row.get(i) + "|");
+                            } else {
+                                fmt.format("%" + maxCellLen + "s", "" + "|");
+                            }
+                        }
+                        while (counter < Math.min(maxColumns - currentColumn, 5)) {
+                            fmt.format("%" + maxCellLen + "s", "|");
+                            counter++;
+                        }
+                        System.out.println(fmt);
+                    }
+                    printLine(Math.min(maxColumns - currentColumn, 5));
+                    currentColumn += 5;
                 }
             }
-            printLine(maxColumns);
         } else {
             System.out.println("Сначала выберите файл!");
         }
@@ -97,20 +109,21 @@ public class CSVLoader {
 
     public void print(int numOfColumn) {
         if (fileLoaded) {
+            boolean isEmpty = true;
             Formatter fmt = new Formatter();
             for (int j = 0; j < fileContent.size(); ++j) {
-                for (int i = 0; i < fileContent.get(j).size(); ++i) {
-                    if (i == numOfColumn - 1) {
-                        fmt.format("%1s", "\n|");
-                        if (fileContent.get(j).get(i).length() > maxCellLen - 1) {
-                            fmt.format("%" + maxCellLen + "s", fileContent.get(j).get(i).substring(0, maxCellLen - 4) + "..|");
-                        } else {
-                            fmt.format("%" + maxCellLen + "s", fileContent.get(j).get(i) + "|");
-                        }
-                    }
+                fmt.format("%1s", "\n|");
+                if (fileContent.get(j).size() > numOfColumn - 1 && fileContent.get(j).get(numOfColumn - 1).length() > maxCellLen - 1) {
+                    fmt.format("%" + maxCellLen + "s", fileContent.get(j).get(numOfColumn - 1).substring(0, maxCellLen - 4) + "..|");
+                    isEmpty = false;
+                } else if (fileContent.get(j).size() > numOfColumn - 1){
+                    fmt.format("%" + maxCellLen + "s", fileContent.get(j).get(numOfColumn - 1) + "|");
+                    isEmpty = false;
+                } else {
+                    fmt.format("%" + maxCellLen + "s", "" + "|");
                 }
             }
-            if (fmt.toString().equals("")) {
+            if (isEmpty) {
                 System.out.println("Столбец " + numOfColumn + " пуст.");
             } else {
                 System.out.println("Столбец " + numOfColumn + ":");
